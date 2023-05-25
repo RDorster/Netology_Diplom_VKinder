@@ -64,7 +64,7 @@ class BotInterface():
                             photos_user = self.api.get_photos(user['id'])
                             attachment = ''
                             for num, photo in enumerate(photos_user):
-                                attachment += f'photo{photo["owner_id"]}_{photo["id"]}'
+                                attachment += f'photo{photo["owner_id"]}_{photo["id"]},'
                                 if num == 2:
                                     break
                             self.message_send(event.user_id,
