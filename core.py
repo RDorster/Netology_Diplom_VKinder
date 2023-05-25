@@ -66,8 +66,6 @@ class VkTools():
                 'likes': photo['likes']['count'], 'comments': photo['comments']['count']}
                for photo in photos]
         res.sort(key=lambda x: x['likes'] + x['comments'], reverse=True)
-        # Ограничение до топ-3 фотографий
-        res = res[:3]
         return res
 
 if __name__ == '__main__':
