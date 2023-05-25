@@ -28,20 +28,31 @@ class VkTools():
         age = datetime.now().year - user_year
         age_from = age - 5
         age_to = age + 5
-        users = self.api.method('users.search', {
-            'count': 10,
-            'offset': 0,
-            'age_from': age_from,
-            'age_to': age_to,
-            'sex': sex,
-            'city': city,
-            'status': 6,
-            'is_closed': False,
-        })
-        users = users.get('items', [])
-        res = [{'id': user['id'], 'name': f"{user['first_name']} {user['last_name']}"}
-               for user in users if not user.get('is_closed')]
+        offset = 0
+        count = 50
+        res = []
+
+        while True:
+            users = self.api.method('users.search', {
+                'count': count,
+                'offset': offset,
+                'age_from': age_from,
+                'age_to': age_to,
+                'sex': sex,
+                'city': city,
+                'status': 6,
+                'is_closed': False,
+            })
+            users = users.get('items', [])
+            users = [{'id': user['id'], 'name': f"{user['first_name']} {user['last_name']}"}
+                    for user in users if not user.get('is_closed')]
+            res.extend(users)
+
+            if len(users) < count:
+                break
+            offset += count
         return res
+
 
     def get_photos(self, user_id):
         # Получение фотографий пользователя
@@ -55,6 +66,8 @@ class VkTools():
                 'likes': photo['likes']['count'], 'comments': photo['comments']['count']}
                for photo in photos]
         res.sort(key=lambda x: x['likes'] + x['comments'], reverse=True)
+        # Ограничение до топ-3 фотографий
+        res = res[:3]
         return res
 
 if __name__ == '__main__':
