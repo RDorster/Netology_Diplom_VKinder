@@ -46,35 +46,31 @@ class BotInterface():
                     connection = data_store.connect_to_database()
                     data_store.create_table_seen_users(connection)
                     users = self.api.search_users(self.params)
-                    user = None
+                    num_users_shown = 0  # Количество показанных пользователей
 
-                    while users:
+                    while users and num_users_shown < 10:  # Показывать только 10 пользователей
                         user = users.pop()
                         if str(user["id"]) not in shown_users:
                             shown_users.add(str(user["id"]))
-                            break
-
-                    if user:
-                        # Проверка наличия пользователя в БД
-                        if data_store.check_seen_user(connection, str(user["id"])):
-                            self.message_send(event.user_id, f"{user['name']} уже есть в базе данных.")
-                        else:
-                            # Если пользователь отсутствует в БД, добавляем его
-                            data_store.insert_data_seen_users(connection, str(user["id"]), 0)
-                            photos_user = self.api.get_photos(user['id'])
-                            attachment = ''
-                            for num, photo in enumerate(photos_user):
-                                attachment += f'photo{photo["owner_id"]}_{photo["id"]},'
-                                if num == 2:
-                                    break
-                            self.message_send(event.user_id,
-                                              f'Посмотри, это - {user["name"]}',
-                                              attachment=attachment
-                                              )
-                            self.message_send(event.user_id,
-                                              f'Ссылка на страницу профиля в VK: https://vk.com/id{user["id"]}')
-                    else:
-                        self.message_send(event.user_id, 'Не найдено новых пользователей.')
+                            num_users_shown += 1
+                            # Проверка наличия пользователя в БД
+                            if data_store.check_seen_user(connection, str(user["id"])):
+                                self.message_send(event.user_id, f"{user['name']} уже есть в базе данных.")
+                            else:
+                                # Если пользователь отсутствует в БД, добавляем его
+                                data_store.insert_data_seen_users(connection, str(user["id"]), 0)
+                                photos_user = self.api.get_photos(user['id'])
+                                attachment = ''
+                                for num, photo in enumerate(photos_user):
+                                    attachment += f'photo{photo["owner_id"]}_{photo["id"]},'
+                                    if num == 2:
+                                        break
+                                self.message_send(event.user_id,
+                                                  f'Посмотри, это - {user["name"]}',
+                                                  attachment=attachment
+                                                  )
+                                self.message_send(event.user_id,
+                                                  f'Ссылка на страницу профиля в VK: https://vk.com/id{user["id"]}')
                     data_store.disconnect_from_database(connection)
                 elif command == 'пока':
                     self.message_send(event.user_id, 'Пока!')
@@ -83,7 +79,6 @@ class BotInterface():
                     data_store.disconnect_from_database(connection)
                 else:
                     self.message_send(event.user_id, 'Команда не распознана.')
-
 
 if __name__ == '__main__':
     bot = BotInterface(community_token, access_token)
