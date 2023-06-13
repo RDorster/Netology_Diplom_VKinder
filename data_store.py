@@ -40,7 +40,7 @@ def insert_data_seen_users(connection, vk_id, offset):
     cursor.close()
     print(f"(SQL) Запись seen user: {vk_id}")
 
-# Удаление таблицы seen)users
+# Удаление таблицы seen_users
 def remove_table_seen_users(connection):
     cursor = connection.cursor()
     cursor.execute('DROP TABLE IF EXISTS seen_users;')
